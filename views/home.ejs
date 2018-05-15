@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>NodeJS Notes</title>
+	<link rel="stylesheet" type="text/css" href="assets/styles.css">
+	<script type="text/javascript" src="assets/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="assets/script.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+</head>
+<body>
+
+	<div class="navbar">
+		<nav>
+			<h1>NodeJS Notes</h1>
+
+			<div class="burger">
+
+				<div class="b-icon">
+				<img id="hamburger"src="assets/hamburger-icon.png">
+				</div>
+
+
+				<div class="nav-content">
+					<div class="nav-sub">
+						<ul class="nav-list">
+							<li><a href="#overview">overview</a></li>
+							<li><a href="#global_object">global object</a></li>
+							<li><a href="#modules">modules</a></li>
+							<li><a href="#event_emitter">event emitter</a></li>
+							<li><a href="#directory_handling">directories, files, and stuff</a></li>
+							<li><a href="#clients_servers">clients and servers</a></li>
+							<li><a href="#streams">streams</a></li>
+							<li><a href="#pipes">pipes</a></li>
+							<li><a href="#basic_routing">basic routing</a></li>
+							<li><a href="#npm">npm</a></li>
+							<li><a href="#express">express</a></li>
+
+						</ul>
+					</div>
+				</div>
+
+				</div>
+
+			
+
+		</nav>
+
+	</div>
+
+	<div class="content">
+	<h2 id="overview">Overview</h2>
+
+	<p>
+		-Node JS is a coding platform that enables users to write both backend(aka server side) and desktop applications in JavaScript. 
+	</p>
+
+	<p>
+		-You can download node from <a href="https://nodejs.org">nodejs.org</a>. Node is written in C++ and runs off of google chrome's v8 engine. It has a non-blocking single threaded model which provides unmatched performance in large scale production applications.
+	</p>
+
+	<p>
+		-Given that Nodejs is is written in javascript, it increases code resuability. 
+	</p>
+	
+
+	<h2 id="global_object">Global Object</h2>
+
+	<p>
+		-The global object is availible in every nodejs application. It comes with several methods and properties such as  setInterval(callback, delay), setTimeout(callback, delay), require("path to module or name of node JS module"), console, __dirname, and __filename.
+	</p>
+
+	<h2 id="modules">Modules</h2>
+
+
+	<p>
+		-Modules are everything in NodeJS. There are very similiar to import statements in Java. However there are some key differences. To get a module in your nodejs app, create a variable and set it equal to require("modulename").
+	</p>
+
+	<p>
+		-To create and import your own moduels do something like this:<br>
+	</p>
+
+	<p class="js-files">
+		stuff.js<br>
+		var objectName = { propertyNameOne: (args) => {method stuff}, propertyNameTwo: (args) => {method stuff}};<br>
+		modules.exports = objectName; <br><br>
+
+		app.js<br>
+		var stuff = require("./stuff.js");<br>
+		stuff.propertyNameOne(args);
+	</p>
+
+	<h2 id="event_emitter">Event Emitter</h2>
+
+	<p>
+		-Event Emitters are access from the event module. This allows a callback functioned to be fired when a specific event occurs. This is very similiar to how an event occurs in javascript. In node, the events are custom. Lets look at the following example: 
+	</p>
+
+	<p class="js-files">
+		app.js<br>
+		var events = require("events");<br>
+		var myEmitter = new events.EventEmitter();<br><br>
+		myEmitter.on("someEvent", (mssg) => {<br>
+		console.log(mssg);<br>
+		});<br><br>
+
+		myEmitter.emit("someEvent", "Wakanda Forever!");
+	</p>
+
+	<p>
+		-The util module is another module we can require that allows us to inherit things into objects: 
+	</p>
+
+	<p class="js-files">
+		app.js<br>
+		var count = require("./stuff.js");<br>
+		var events = require("events");<br>
+		var util = require('util');<br><br>
+
+
+		//object constructor<br>
+		var Person = function(name){<br>
+			this.name = name;<br>
+		};<br><br>
+
+		//inherit the event emitter to Person<br>
+		util.inherits(Person, events.EventEmitter);<br><br>
+
+		//create heroes<br>
+		var Bayonetta = new Person("Bayonetta");<br>
+		var ToonLink = new Person("Toon Link");<br>
+		var Sol_Badguy = new Person("Sol Badguy");<br>
+		var Midoriya = new Person("Midoriya");<br><br>
+
+		//create hero array<br>
+		var Heroes = [Bayonetta, ToonLink, <br>Sol_Badguy, Midoriya];<br><br>
+
+		//attach custom emitter to each person since they now have inheritted it<br>
+		Heroes.forEach((person) =>{<br>
+			person.on("speak", (mssg) => {<br>
+				console.log(person.name + " said: " + mssg);<br>
+			});<br>
+		});<br><br>
+
+		//emit events<br>
+		Bayonetta.emit("speak", "FUCK OFF!");<br>
+		ToonLink.emit("speak", "Ayyah!");<br>
+		Sol_Badguy.emit("speak", "Heaven or Hell!");<br>
+		Midoriya.emit("speak", "Detroit Smash!!!");<br>
+	</p>
+
+
+	<h2 id="directory_handling">Reading, Writing, Deleting Files and Directories in Node</h2>
+
+	<p>
+		-One of nodes modules is called the FileSystem. Actually, when you code it, you have to call require("fs"). This is a NodeJS core module.  
+	</p>
+
+	<p>-Lets take a look at how we can read and write files:</p>
+
+	<p class="js-files">
+		readMe.txt<br>
+		Wakanda Forever!<br><br>
+
+		app.js<br>
+		//get filesystem module "fs"<br>
+		var fs = require("fs");<br><br>
+
+
+		//readFileSync is a syncronous method meaning that it is blocking.<br>
+		//blocking code will finish execution before the allowing other code<br>
+		//to execute<br>
+		//the method takes the file name and the character encoding which<br> 
+		//is utf8.<br>
+		var readMe = fs.readFileSync("readMe.txt", "utf8");<br>
+		console.log(readMe);<br><br>
+
+		//syncronous write<br>
+		fs.writeFileSync("writeMe.txt", readMe);<br><br>
+
+		//asyncronous file read<br>
+		fs.readFile("readMe.txt", "utf8", (err, data)=>{
+			console.log(data);
+		});<br><br>
+
+		console.log("this came before the readFile");<br><br>
+
+		//asyncronous file write<br>
+		fs.readFile("readMe.txt", "utf8", (err, data)=>{<br>
+			fs.writeFile("asyncWrite.txt", data, ()=>{<br>
+				console.log("finished writing");<br>
+			});<br>
+			console.log("this came before the writeFile");<br>
+		});
+
+
+	</p>
+
+	<p>-To delete a file, you can call fs.unlink("filename.extension"); There are synchronous and asynchronous methods for making and removing directors. You may not remove a directory unless the director is empty. The methods are mkdir, mkdirSync, rmdir and rmdirSync with the following method signature: <br>method("directoryName", callback function if you want one);</p>
+
+	<h2 id="clients_servers">Clients and Servers</h2>
+
+	<p>-Clients and Servers have to agree upon a set of rules to transmit and recieved data. This is called the protocol, such as HTTP or FTP. The way the data is sent from the server to the client is through TCP via small pieces called packets.</p>
+
+	<p>The route to the web server is to the computer via the ip address:port number. The Server Program listens for data routed to that port number and will respond. The data that is sent also contains headers with information like the type of data such as "status(ie 404, 200, 304" "Content Type: text/plain" Lets make a server:</p>
+
+	<p class="js-files">
+		app.js<br>
+		//required http module<br>
+		var http = require("http");<br><br>
+
+		//server variable<br>
+		var server = http.createServer((req, res)=>{<br>
+			//writing the header information for the data<br>
+			res.writeHead(200, {"Content-Type" : "text/plain"});<br><br>
+
+			//ending the response(with teh data)<br>
+			res.end("Wakanda Forever")<br>
+		});<br><br>
+
+		//listen on the port with the computers local ip address<br>
+		server.listen(3000, "192.168.1.8");<br>
+		console.log("Hey auntie..");<br>
+	</p>
+
+	<h2 id="streams">Streams</h2>
+
+	<p>
+		An alternative way to read and write files to the readFile/writeFile methods is using streams. It is true that the former are asynchronous, but there are other issues to consider. It is better to transmit data using a buffer which is why we use streams. One thing to remember is that streams inherit event emitter from the events module. So you can check everytime a chunk of data is transmitted. Lets check out the streams:
+	</p>
+
+	<p class="js-files">
+		app.js <br>
+		//requierd http and fs modules<br>
+		var http = require("http");<br>
+		var fs = require("fs");<br><br>
+
+		//make stream variables<br>
+		var myReadStream = fs.createReadStream(__dirname + "/readMe.txt", "utf8");<br>
+		var myWriteStream = fs.createWriteStream(__dirname + "/writeMe.txt");<br><br>
+
+		//check data event and write to writeStream<br>
+		myReadStream.on("data", (chunk)=>{<br>
+		console.log("new chunk recieved");<br>
+		myWriteStream.write(chunk);<br>
+		});<br>
+
+	</p>
+
+	<h2 id="pipes">Pipes</h2>
+
+	<p>Pipes are a much more elegant approach to handing sending data from a readstream and "pipe it" to a write stream. Instead of having to manually listening for data events and manually write to a writestream, the pipe handles it for us. You still need to create a readStream. We can use a method called pipe() on the readStream. Lets look at the following example:</p>
+
+	<p class = "js-files">
+		app.js<br>
+		//required http module<br>
+		var http = require("http");<br>
+		var fs = require("fs");<br><br>
+
+		//server variable<br>
+		var server = http.createServer((req, res)=>{<br>
+			//writing the header information for the data<br>
+			res.writeHead(200, {"Content-Type" : "text/plain"});<br>
+			var myStream = fs.createReadStream(__dirname + "/readMe.txt", "utf8");<br>
+			//This is how we use the pipes<br>
+			myStream.pipe(res);<br>
+		});<br><br>
+
+		//listen on the port with the computers local ip address<br>
+		server.listen(3000, "192.168.1.8");<br>
+		console.log("Hey auntie..");<br>
+	</p>
+
+	<h2 id="basic_routing">Basic Routing</h2>
+	<p>So lets bring some of this stuff all together now. With the streams, the piping and some ife then statements we can server up some basic html pages. Remember to get the url from req.url:</p>
+
+	<p class="js-files">
+		app.js<br>
+		//required http module<br>
+		var http = require("http");<br>
+		var fs = require("fs");<br><br>
+
+		//server variable<br>
+		var server = http.createServer((req, res)=>{<br><br>
+
+			if(req.url === "/" || req.url === "/home"){<br>
+				//writing the header information for the data<br>
+				res.writeHead(200, {"Content-Type" : "text/html"});<br>
+				fs.createReadStream(__dirname + "/nodeJS.html").pipe(res);<br>
+			}else if(req.url === "/assets/styles.css"){<br>
+				res.writeHead(200, {"Content-Type" : "text/css" });<br>
+				fs.createReadStream(__dirname + "/assets/styles.css").pipe(res);<br>
+			}else {<br>
+				res.writeHead(404, {"Content-Type" : "text/html" });<br>
+				fs.createReadStream(__dirname + "/404.html").pipe(res);<br>
+			}<br>
+
+		});<br><br>
+
+		//listen on the port with the computers local ip address<br>
+		server.listen(3000, "192.168.1.8");<br>
+		console.log("Hey auntie..");<br>
+	</p>
+
+	<h2 id="npm">NPM</h2>
+
+	<p>
+		Npm stands for node package manager. You can create a package.json file with "npm init". To install packages use "npm install package-name". If you want to install and save as dependency use "npm install package-name -save". If you give your files to someone without the packages installed, but the dependencies saved in the package.json file, all they have to do is call "npm install" and that will install all of the dependencies. Nodemon is a nice development tool - use "npm install nodemon -g". This installs globally and you used nodemon app.js and it will automatically update the server. 
+	</p>
+
+	<h2 id="express">Express</h2>
+
+	<p>
+		It is one of the most popular modules for node on the internet. That is for three reasons. It has an easy and flexible routing system, Integrates with many templating engines, and contains a middleware framework. FYI, middleware just refers to any code that gets executed in the middle of the request and response. Lets make a simple express app:
+	</p>
+
+	<p class="js-files">
+		app.js<br>
+		//first express app<br>
+		//require express<br>
+		var express = require("express");<br><br>
+
+
+		//get our application from the express method<br>
+		var app = express();<br><br>
+
+
+		//respond to get request from the client browswer(ie urls)<br>
+		app.get("/", (req, res) =>{<br>
+			res.send("this is the homepage"); // you should notice that this doesn't require us to specify header information<br>
+		});<br><br>
+
+
+		app.get("/contact", (req, res) =>{<br>
+			res.send("this is the contact page");<br>
+		});<br><br>
+
+		//dynamic routing<br>
+		//the ":name" is now dynamic and we can use the other information, like in a database
+		app.get("/profile/:name", function(req, res){<br>
+			res.send("You requested to see a profile with the name of " + req.params.name);<br>
+		});<br><br>
+
+
+		//listen on port 3000<br>
+		app.listen(3000);<br>
+	</p>
+
+</div>
+
+
+
+</body>
+</html>
+
+
